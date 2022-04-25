@@ -1,0 +1,68 @@
+Folder Structure:
+	-Readme.txt
+	-Rishabh_Singh.py
+	-Video recording - astar.mp4
+
+How to run the code:
+Copy the Rishabh_Singh.py to your desired location
+Open the Rishabh_Singh.py file in any text editor (VSC is preferrable)
+
+Libraries required are:
+numpy - pip3 install numpy
+queue - pip3 install queue
+pygame - pip3 install pygame
+matplotlib - pip3 install matplotlib
+cv2 - pip3 install cv2 
+
+
+------FIRST ACTIVATE YOUR ENVIRONMENT-------
+
+Type running command on the command terminal: 
+'python3 Rishabh_Singh.py'
+
+![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
+Sample commands to run the program:
+python3 Rishabh_Singh.py 
+
+Expected input:
+please enter the starting x coordinate from 10-390: 11
+please enter the starting x coordinate from 10-240: 11
+please enter the starting angle from 0 to 330 (step size of 30 degree):0
+please enter the goal x coordinate from 10-390: 390
+please enter the goal y coordinate from 10-240: 240
+please enter the goal angle from 0 to 330 (step size of 30 degree:330
+Enter the value of step size between (1-10):2
+
+
+Github link: https://github.com/Rish2911/A_start_661_proj_1
+
+NOTE: Some goals may take lot of time, to check the code for locations like 11,11,30 to 150,150,60 or the sample one or something nearby
+
+![alt-text](astar_output.gif)
+
+
+
+
+METHOD TO RUN THE PACKAGE
+### Step 1: 
+Extract the folder 'Fire_fighting_bot-main' and copy the folder 'fire_fight_1', which is inside src, to your catkin_ws/src
+### Step 2: Build the Package. 
+ In your terminal go to your catkin_ws folder and type 
+ #### catkin_make clean && catkin_make
+ Note: Source your catkin workspace (e.g. if catkin_ws is in your home directory, do source ~/catkin_ws/devel/setup.bash)
+ optional: add this command to your .bashrc
+### Step 3: Launch the package
+ After sourcing the ~/.bashrc, type 
+ #### roslaunch fire_fight_1 template_launch.launch
+ This will spawn the robot in Gazebo.
+### Step 4: Running the teleop
+ Open a new terminal and type 
+   #### source /opt/ros/noetic/setup.bash
+   #### source ~/catkin_ws/devel/setup.bash
+   #### rosrun fire_fight_1 teleop.py
+  If the above command does not work, it is mostly because teleop.py is not an executable.
+  Alternative: To make teleop.py an executable. Go to catkin_ws/src/fire_fight_1/src , and type 
+   #### chmod +x teleop.py
+   Repeat from Step 2.
+
+Now, the teleop is running and you can press the mentioned keys to control the robot.

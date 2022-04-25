@@ -16,7 +16,6 @@ import math
 
 def map():
     global x_size, y_size, map_def, Rat
-    Rat=1
     x_size = int(400/Rat) #x and y  as per gloabl coordinate system and not matrix
     y_size = int(250/Rat)
     map_def = np.zeros((y_size,x_size,360))
@@ -172,13 +171,12 @@ def move_zero(node, All_list, Open_list,action):
     L = 0.354*1000
     ul=action[0]
     ur=action[1]
-    x_dot=[]
     t=0
     dt=0.1
     D=0
     Xn,Yn,thetan=node.node_loc
     thetan=3.14*thetan/180 ## degree to radian
-    while t<2:
+    while t<0.2:
         Xs=Xn
         Ys=Yn
         t=t+dt
@@ -191,7 +189,7 @@ def move_zero(node, All_list, Open_list,action):
         D=D+math.sqrt(math.pow((0.5*r * (ul+ur) * math.cos(thetan) * dt),2)+math.pow((0.5*r * (ul+ur) * math.sin(thetan) * dt),2))
         ## check if path in obstacle
         # print(Xn,Yn,thetan)
-        if (np.round(Yn)>=250 or np.round(Yn)<=0 or 0>= np.round(Xn) or np.round(Xn)>=400 or (Xs==Xn and Ys==Yn)):
+        if (np.round(Yn)>=250 or np.round(Yn)<=0 or 0>= np.round(Xn) or np.round(Xn)>=400):
             print('Boundaries')
             return None
         elif map_obs4[int(np.round(Yn)),int(np.round(Xn)),int(np.round((thetan*180/3.14))%360)]==-1:
@@ -274,72 +272,36 @@ def cost_update(nod, Xn ,Yn, thetan, All_list,  Closed_list, Open_list, map_obs4
                             j[0] = round((nod.c2c + D + All_list[index-1].c2g),1)
                             # i.parent_id = nod.node_id
 
-def backtrack(A_list, x, y,z):
+def backtrack(A_list, x, y, z):
+    lin_vel, ang_vel = [], []
     ind = int(map_obs4[All_list[goal_id].node_loc[1], All_list[goal_id].node_loc[0],All_list[goal_id].node_loc[2]])
     x.append(A_list[ind-1].node_loc[0])
     y.append(A_list[ind-1].node_loc[1])
     z.append(A_list[ind-1].node_loc[2])
+
+    
+
     id = A_list[ind-1].parent_id
     while(id>0):
         x.append(A_list[id-1].node_loc[0])
         y.append(A_list[id-1].node_loc[1])
-        z.append(A_list[id-1].node_loc[2])
+        lin_vel.append()
+        z.append(A_list[ind-1].node_loc[2])
         id = A_list[id - 1].parent_id
-
-def calc_linear(x_a,y_a,z_a):
-    v_list=[]
-    w=[]
-    t_list=[]
-    t=4
-    v_i = 0.2
-    w_old = 0
-    w_i = 0
-    for i in range(1,len(x_a),4):
-        dist=(((x_a[i-1]-x_a[i])**2+(y_a[i-1]-y_a[i])**2)**(1/2))/1000
-        # d=dist/t
-        v=dist/t
-        o_x=x_a[i-1]
-        n_x=x_a[i]
-        o_y=y_a[i-1]
-        n_y=y_a[i]
-        d = 0
-        w_old = 0
-        delt = 0
-        
-        
-        if v>0.22:
-            v = 0.22
-            delt = dist/v
-        else:
-            delt = t
-
-        w_new = math.radians(z_a[i]-z_a[i-1])/delt
-
-
-        if w_new>2:
-            w_new = 2
-
-        elif w_new<-2:
-            w_new = -2
-
-        v_list.append(v)
-        w.append(w_new)
-        t_list.append(delt)
-
-        v_list.append(0)
-        w.append(0)
-        t_list.append(1)
-        
-        
     
-    return v_list,w,t_list
+    lin_vel = [x[1:] - x[:-1], y[1:] - y[:-1]]
+    ang_vel = z[1:] - z[:-1]
 
-        
+    writing_to_xl(lin_vel, ang_vel)
 
-
-
-
-
+def writing_to_xl(lin_vel, ang_vel):
+    output = "Output.txt"
+    if os.path.exists(output):
+        os.remove(output)
+    op_path=[[lin_vel[i],ang_vel[i]] for i in range(len(lin_vel))]
+    with open('output.txt', 'w') as file:
+        for element in op_path:
+            file.write(",".join((str(x) for x in element)) + '\n')
 
 def display_path(goal_id):
     global x_a, y_a
@@ -348,24 +310,11 @@ def display_path(goal_id):
     y_a = []
     z_a = []
     backtrack(All_list, x_a, y_a, z_a)
-    lin_vel,ang_vel,t_list=calc_linear(x_a, y_a, z_a)
-
     # y_a.reverse()
     # x_a.reverse()
     plt.title('Backtracked Path')
     plt.axis([0, 400/Rat, 0, 250/Rat])
     plt.plot(x_a,y_a)
-    op_path=[[lin_vel[i],ang_vel[i],t_list[i]] for i in range(len(lin_vel))]
-    with open('output.txt', 'w') as file:
-        for element in op_path:
-            file.write(",".join((str(x) for x in element)) + '\n')
-
-    # path=[[x_a,ang_vel] for i in range(len(lin_vel))]
-    # with open('output.txt', 'w') as file:
-    #     for element in op_path:
-    #         file.write(",\n".join((str(x) for x in element)) + '\n')
-
-
     plt.plot(x_nc, y_nc)
     plt.plot(x_t1_nc,y_t1_nc)
     plt.plot(x_t2_nc,y_t2_nc)
@@ -404,7 +353,7 @@ def display():
     display_width = int(400/Rat)
     display_height = int(250/Rat)
     display_h = 250
-    n = 2
+    n = 4
     m = n
     s = n/Rat
     gameDisplay = pygame.display.set_mode((n*display_width,n*display_height))
@@ -412,8 +361,7 @@ def display():
     black = (0,0,0)
     white = (255,255,255)
     Y = (255, 0,0)
-    B = (0,0,255)
-    G=(0,255,0)
+    B = (0,255,0)
 
     clock = pygame.time.Clock()
     done = True
@@ -426,8 +374,6 @@ def display():
         pygame.draw.circle(gameDisplay, B, (n*x_centre, n*(display_height-1-y_centre)), n*radius)
         pygame.draw.polygon(gameDisplay, B, [(s*114,s*(display_h-1-209)),(s*35,s*(display_h-1-184)), (s*104,s*(display_h-1-99)), (s*79,s*(display_h-1-179))])
         pygame.draw.polygon(gameDisplay, B, [(s*199,s*(display_h-1-59.6)),(s*234,s*(display_h-1-78.8)), (s*234,s*(display_h-1-119)), (s*200,s*(display_h-1-139)),(s*164,s*(display_h-1-119)),(s*164,s*(display_h-1-78.8))])
-        pygame.draw.circle(gameDisplay, G, (n*goal_location[0], n*(display_height-1-goal_location[1])), n*5)
-        pygame.draw.circle(gameDisplay, Y, (n*start_location[0], n*(display_height-1-start_location[1])), n*5)
         for i in range(len(All_list)):
                 p_id = All_list[i].parent_id
                 if(i>0):
@@ -460,40 +406,39 @@ def display():
 # %%
 
 def initial():
-    global All_list, Closed_list, goal_location, Open_list, allp_map, goal_list, L,rpm1,rpm2,Rat,start_location
+    global All_list, Closed_list, goal_location, Open_list, allp_map, goal_list, L,rpm1,rpm2,Rat
     allp_map = []
     All_list = []
     Closed_list = []
     goal_list = []
     first_node_id = 1
-    start_cords_x = int(input("please enter the starting x coordinate between 10 and 390: \n"))
-    start_cords_y = int(input("please enter the starting y coordinate between 10 and 240: \n"))
-    start_angle= int(input("please enter the starting angle from 0 to 360: \n"))
-
-
-    if start_cords_x<10 or start_cords_x>(400-10) or start_cords_y<10 or start_cords_y>(250-10):
-        print("Either wrong input or the start node is in obstacle space")
-        exit(0)
-    else:
-        start_location = [int((start_cords_x-1)/Rat), int((start_cords_y-1)/Rat), start_angle]
-        
-    Rat=1
-    rpm1=int(input("please enter the first rotations per minute value: \n"))/60
-    rpm2=int(input("please enter the second rotations per minute value: \n"))/60
+    start_cords_x = int(10)   ##int(input("please enter the starting x coordinate between 10 and 390: \n"))
+    start_cords_y = int(10)     ##int(input("please enter the starting y coordinate between 10 and 240: \n"))
+    start_angle= int(0)    ##int(input("please enter the starting angle from 0 to 330 (step size of 30 degree: \n"))
+    Rat=0.5
+    rpm1=50/60
+    rpm2=100/60
     r = 0.038*1000
     L = 0.354*1000
-    goal_cords_x =int(input("please enter the goal x coordinate between 10 and 390: \n"))
-    goal_cords_y =int(input("please enter the goal y coordinate between 10 and 240: \n"))
-                           
+    goal_cords_x = 390   ##int(input("please enter the goal x coordinate between 10 and 390: \n"))
+    goal_cords_y = 0      ##int(input("please enter the goal y coordinate between 10 and 240: \n"))
+                            ##int(input("please enter the goal angle from 0 to 330 (step size of 30 degree: \n"))
+    goal_list = goal_space(int((goal_cords_x-1)/Rat), int((goal_cords_y-1)/Rat))
+
+    # if start_cords_x<10 or start_cords_x>(400-10) or start_cords_y<10 or start_cords_y>(250-10):
+    #     print("Either wrong input or the start node is in obstacle space")
+    #     exit(0)
+    # else:
+    start_location = [int((start_cords_x-1)/Rat), int((start_cords_y-1)/Rat), start_angle]
+    
+    
     
     if goal_cords_x<10 or goal_cords_x>(400-10) or goal_cords_y<10 or goal_cords_y>(250-10):
         print("Either wrong input or the goal node is in obstacle space")
         exit(0)
     else:
         goal_location = [int((goal_cords_x-1)/Rat), (int(goal_cords_y-1)/Rat)]
-
-
-    goal_list = goal_space(int((goal_cords_x-1)/Rat), int((goal_cords_y-1)/Rat))
+                                                               ##int(input("Enter the value of step size between (1-10): \n"))
 
 
 
@@ -521,11 +466,11 @@ def initial():
 
 # %%
 
-Rat=1
+
 initial()
 
 # %%
-goal_list
+# goal_list
 
 # %%
 
